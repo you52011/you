@@ -1,9 +1,9 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-    <meta charset="UTF-8">
+    <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ȥζ�˸����</title>
+    <title>趣味人格测试</title>
     <style>
         * {
             margin: 0;
@@ -153,18 +153,16 @@
 </head>
 <body>
     <div class="container">
-        <h1 class="title">Ȥζ�˸�С����</h1>
-        <p class="desc">һ��10����Ŀ��ƾ��һֱ��ѡ�񣬲鿴����˸�����</p>
-        <div class="timer-text" id="timer">������ʱ��00:00</div>
+        <h1 class="title">趣味人格小测试</h1>
+        <p class="desc">一共10道题目，凭第一直觉选择，查看你的人格类型</p>
+        <div class="timer-text" id="timer">答题用时：00:00</div>
         <div class="progress-bar-wrap">
             <div class="progress-bar" id="progressBar"></div>
         </div>
 
-        <!-- ��Ŀҳ������ -->
         <div id="questionPages">
         </div>
 
-        <!-- ���ҳ -->
         <div id="resultPage" class="page">
             <div class="result-box">
                 <div class="result-type" id="resType"></div>
@@ -174,8 +172,8 @@
                     <img id="posterPreview" />
                 </div>
                 <div class="result-actions">
-                    <button id="downloadBtn">���ؽ������</button>
-                    <button id="restartBtn">���²���</button>
+                    <button id="downloadBtn">下载结果海报</button>
+                    <button id="restartBtn">重新测试</button>
                 </div>
                 <canvas id="posterCanvas"></canvas>
             </div>
@@ -185,93 +183,93 @@
 <script>
 const questions = [
     {
-        title: "�ۻ����֮����һ��᣿",
+        title: "聚会结束之后，你一般会？",
         options: [
-            {text: "����ƣ������Ҫһ���˰�����Ϣ", score: {I:1}},
-            {text: "����ܺã�������������罻", score: {E:1}}
+            {text: "觉得疲惫，想要一个人安静休息", score: {I:1}},
+            {text: "心情很好，还想继续聊天社交", score: {E:1}}
         ]
     },
     {
-        title: "���ƻ���ʱ��������ţ�",
+        title: "做计划的时候，你更相信？",
         options: [
-            {text: "��ʵ�ľ��顢���ü�����ʵ", score: {S:1}},
-            {text: "ֱ������к͸��ֿ�����", score: {N:1}}
+            {text: "真实的经验、看得见的事实", score: {S:1}},
+            {text: "直觉、灵感和各种可能性", score: {N:1}}
         ]
     },
     {
-        title: "����ʱ�䣬���ϲ����",
+        title: "空闲时间，你更喜欢？",
         options: [
-            {text: "���顢׷�磬���Դ���", score: {I:1}},
-            {text: "Լ���ѳ��ţ��μӻ", score: {E:1}}
+            {text: "看书、追剧，独自待着", score: {I:1}},
+            {text: "约朋友出门，参加活动", score: {E:1}}
         ]
     },
     {
-        title: "ѧϰ�������ƫ�ã�",
+        title: "学习新事物，你偏好？",
         options: [
-            {text: "�ȿ�ϸ�ڣ�һ��������ʵ��", score: {S:1}},
-            {text: "����������˼·���Զ�����", score: {N:1}}
+            {text: "先看细节，一步步动手实操", score: {S:1}},
+            {text: "先理解整体思路和脑洞方向", score: {N:1}}
         ]
     },
     {
-        title: "�����з��յ�ʱ����ϰ�ߣ�",
+        title: "心里有烦恼的时候，你习惯？",
         options: [
-            {text: "�Լ�����������������������", score: {I:1}},
-            {text: "�������ģ������ͷ�����", score: {E:1}}
+            {text: "自己消化，很少主动找人倾诉", score: {I:1}},
+            {text: "找人聊聊，倾诉释放情绪", score: {E:1}}
         ]
     },
     {
-        title: "�����µ�ʱ��������׹�ע��",
+        title: "看故事的时候，你更容易关注？",
         options: [
-            {text: "��ʵ��������ں�ϸ��", score: {S:1}},
-            {text: "��������������ʺ�����ռ�", score: {N:1}}
+            {text: "真实发生的情节和细节", score: {S:1}},
+            {text: "背后的隐喻、伏笔和想象空间", score: {N:1}}
         ]
     },
     {
-        title: "��ʶ�����ѣ���ͨ����",
+        title: "认识新朋友，你通常？",
         options: [
-            {text: "�Ƚ����ȣ���Ϥ֮��ŷſ�", score: {I:1}},
-            {text: "��������ܿ��������", score: {E:1}}
+            {text: "比较慢热，熟悉之后才放开", score: {I:1}},
+            {text: "主动搭话，很快就能熟络", score: {E:1}}
         ]
     },
     {
-        title: "���˸��㽨�飬�����ȿ��ǣ�",
+        title: "别人给你建议，你优先考虑？",
         options: [
-            {text: "��ʵ�ܲ�����ء���û������", score: {S:1}},
-            {text: "�뷨�Ƿ���ӱ��δ����Ǳ��", score: {N:1}}
+            {text: "现实能不能落地、有没有先例", score: {S:1}},
+            {text: "想法是否新颖、未来的潜力", score: {N:1}}
         ]
     },
     {
-        title: "ѹ���ܴ��ʱ����᣿",
+        title: "压力很大的时候，你会？",
         options: [
-            {text: "�����侲���Լ���������", score: {I:1}},
-            {text: "������齻��������ѹ��", score: {E:1}}
+            {text: "独处冷静，自己慢慢梳理", score: {I:1}},
+            {text: "找人陪伴交流，缓解压力", score: {E:1}}
         ]
     },
     {
-        title: "����δ��������ϲ����",
+        title: "畅想未来生活，你更喜欢？",
         options: [
-            {text: "����̤ʵ�����ü�������", score: {S:1}},
-            {text: "�����仯������δ֪��������", score: {N:1}}
+            {text: "安稳踏实、看得见的生活", score: {S:1}},
+            {text: "充满变化、充满未知的新体验", score: {N:1}}
         ]
     }
 ]
 
 const resultMap = {
     "IS": {
-        name: "������ʵ��",
-        desc: "������������ע����ʵ������̤ʵ���ס���ϲ��������罻��ϲ����̤ʵ������ÿ���£��������˿ɿ��ĺ�ܡ��������ۼ�Ϊʵ��ƫ���ȶ���������"
+        name: "沉静务实者",
+        desc: "你稳重内敛，注重现实，做事踏实靠谱。不喜欢浮夸的社交，喜欢脚踏实地做好每件事，是身边人可靠的后盾。你相信眼见为实，偏爱稳定有序的生活。"
     },
     "IN": {
-        name: "��ʡ�����",
-        desc: "�����������ʮ�ַḻ��ϲ��˼�����Զ��ܴ�ϰ�߶��������ڲ�׽��У������������Լ����뷨������ﱳ����������ܸ���Ȥ��"
+        name: "内省空想家",
+        desc: "你的内心世界十分丰富，喜欢思考、脑洞很大。习惯独处，善于捕捉灵感，常常沉浸在自己的想法里，对事物背后的深层意义很感兴趣。"
     },
     "ES": {
-        name: "����ʵ�ɼ�",
-        desc: "�������ʣ��ӵ��������ó����˴򽻵���������ʵ���飬�ж�����ǿ�����ڴ�����Χ��Χ��ϲ�����ü��������ŵĳɹ���"
+        name: "热情实干家",
+        desc: "你外向开朗，接地气，很擅长与人打交道。重视真实体验，行动力很强，善于带动周围氛围，喜欢看得见、摸得着的成果。"
     },
     "EN": {
-        name: "����̽����",
-        desc: "���ֹ������Զ��ḻ���Ȱ���������ó��罻���뷨�����пգ�ϲ��̽�����ָ����Ŀ����ԣ���Ⱦ����ǿ��"
+        name: "活力探索家",
+        desc: "你乐观外向，脑洞丰富，热爱新鲜事物。擅长社交，想法天马行空，喜欢探索各种各样的可能性，感染力很强。"
     }
 }
 
@@ -282,7 +280,6 @@ const wrap = document.getElementById("questionPages");
 const resultPage = document.getElementById("resultPage");
 const progressBar = document.getElementById("progressBar");
 
-// ��ʱ����
 let startTime = null;
 let timerInterval = null;
 const timerDom = document.getElementById("timer");
@@ -294,7 +291,7 @@ function startTimer(){
         const diff = Math.floor((Date.now() - startTime)/1000);
         const m = String(Math.floor(diff/60)).padStart(2,'0');
         const s = String(diff % 60).padStart(2,'0');
-        timerDom.innerText = `������ʱ��${m}:${s}`;
+        timerDom.innerText = `答题用时：${m}:${s}`;
     }, 1000);
 }
 function stopTimer(){
@@ -321,10 +318,10 @@ function renderQuestions(){
                 `).join('')}
             </div>
             <div class="btn-wrap">
-                <button id="prevBtn" ${idx===0 ? 'disabled' : ''}>��һ��</button>
+                <button id="prevBtn" ${idx===0 ? 'disabled' : ''}>上一题</button>
                 ${idx === totalQ-1
-                    ? `<button id="submitBtn" ${answers[idx]==null ? 'disabled':''}>�鿴���</button>`
-                    : `<button id="nextBtn" ${answers[idx]==null ? 'disabled':''}>��һ��</button>`
+                    ? `<button id="submitBtn" ${answers[idx]==null ? 'disabled':''}>查看结果</button>`
+                    : `<button id="nextBtn" ${answers[idx]==null ? 'disabled':''}>下一题</button>`
                 }
             </div>
         `
@@ -390,7 +387,6 @@ function calcResult(){
     drawPoster(typeKey, res.name, res.desc, timerDom.innerText);
 }
 
-// Canvas���Ʒ�������
 function drawPoster(type, name, desc, timeText){
     const canvas = document.getElementById("posterCanvas");
     const ctx = canvas.getContext("2d");
@@ -399,7 +395,6 @@ function drawPoster(type, name, desc, timeText){
     canvas.width = w;
     canvas.height = h;
 
-    // ���䱳��
     const grad = ctx.createLinearGradient(0,0,w,h);
     grad.addColorStop(0, '#667eea');
     grad.addColorStop(1, '#764ba2');
@@ -417,7 +412,6 @@ function drawPoster(type, name, desc, timeText){
     ctx.font="18px Microsoft Yahei";
     ctx.fillText(timeText, w/2, 260);
 
-    // ���ֻ���
     ctx.textAlign="left";
     ctx.font="18px Microsoft Yahei";
     const maxW = 480;
@@ -441,16 +435,15 @@ function drawPoster(type, name, desc, timeText){
     ctx.fillStyle="#ffffffbb";
     ctx.textAlign="center";
     ctx.font="16px Microsoft Yahei";
-    ctx.fillText("Ȥζ�˸���� �� �������˸�", w/2, h-80);
+    ctx.fillText("趣味人格测试 · 测测你的人格", w/2, h-80);
 
     const imgUrl = canvas.toDataURL("image/png");
     document.getElementById("posterPreview").src = imgUrl;
 
-    // ���ذ�ť
     document.getElementById("downloadBtn").onclick = ()=>{
         const a = document.createElement("a");
         a.href = imgUrl;
-        a.download = `�˸���Խ��_${type}.png`;
+        a.download = `人格测试结果_${type}.png`;
         a.click();
     }
 }
@@ -464,7 +457,6 @@ document.getElementById("restartBtn").onclick = ()=>{
     renderQuestions();
 }
 
-// ��ʼ��
 updateProgress();
 startTimer();
 renderQuestions();
