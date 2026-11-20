@@ -1,0 +1,652 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MBTI 16型人格测试</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+<script>
+tailwind.config = {
+  theme: {
+    extend: {
+      colors: {
+        primary: '#8c647e',
+        lightbg: '#f7f0f0',
+        cardbg: '#ffffff',
+        darktext: '#4b3844',
+        subtext: '#887882',
+        greenMain: '#00b878'
+      },
+      fontFamily: {
+        sans: ['system-ui', 'sans-serif']
+      }
+    }
+  }
+}
+</script>
+<style type="text/tailwindcss">
+@layer utilities {
+  .content-auto { content-visibility: auto; }
+  .btn-option { @apply w-full text-left p-4 rounded-xl border border-gray-300 hover:border-primary hover:bg-primary/10 transition-all duration-200 cursor-pointer; }
+  .btn-option.active { @apply border-primary bg-primary/20; }
+  .fade-in { animation: fadeIn .4s ease; }
+  .grad-card { background: linear-gradient(135deg,#00c984,#009988); }
+  .toggle-item { @apply w-full text-left p-4 rounded-xl bg-white flex items-center gap-3 shadow-sm hover:shadow transition cursor-pointer; }
+  .toggle-content { @apply px-4 pb-4 text-gray-600 leading-relaxed; display:none; }
+  .toggle-content.open { display:block; }
+  .rotate-icon { transform: rotate(180deg); }
+  @keyframes fadeIn { from { opacity:0; transform: translateY(10px); } to { opacity:1; transform: translateY(0); } }
+  @keyframes pulse {
+    0%,100% {opacity:1;}
+    50% {opacity:0.4;}
+  }
+  .loading-animate { animation: pulse 1.2s infinite; }
+  .toast { @apply fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-gray-700 text-white px-6 py-4 rounded-lg z-50 hidden; }
+}
+</style>
+</head>
+<body class="bg-lightbg text-darktext min-h-screen">
+<div class="max-w-xl mx-auto px-6 py-10">
+  <!-- 首页 -->
+  <div id="page-start" class="fade-in text-center">
+    <div class="relative mb-8">
+      <div class="w-60 h-60 mx-auto relative">
+        <svg viewBox="0 0 240 240" class="w-full h-full">
+          <circle cx="120" cy="120" r="90" fill="#e9e0e4" opacity="0.6" />
+          <path d="M 60 60 L 40 170 Q 120 190 120 170 L 120 60 Z" fill="#fef9f5" stroke="#4b3844" stroke-width="3" />
+          <path d="M 70 90 Q 80 85 90 90" stroke="#4b3844" stroke-width="2" fill="none" />
+          <path d="M 70 130 Q 80 142 90 130" stroke="#4b3844" stroke-width="2" fill="none" />
+          <line x1="120" y1="55" x2="120" y2="175" stroke="#8c647e" stroke-width="2" stroke-dasharray="5 5" />
+          <path d="M 180 60 L 200 170 Q 120 190 120 170 L 120 60 Z" fill="#8c647e" stroke="#4b3844" stroke-width="3" />
+          <path d="M 150 90 Q 160 95 170 90" stroke="#ffffff" stroke-width="2" fill="none" />
+          <path d="M 150 130 Q 160 118 170 130" stroke="#ffffff" stroke-width="2" fill="none" />
+          <path d="M 40 50 L 44 58 L 52 58 L 46 64 L 48 72 L 40 68 L 32 72 L 34 64 L 28 58 L 36 58 Z" fill="#b8a2b0" />
+          <path d="M 200 40 L 204 48 L 212 48 L 206 54 L 208 62 L 200 58 L 192 62 L 194 54 L 188 48 L 196 48 Z" fill="#b8a2b0" />
+          <circle cx="35" cy="140" r="3" fill="#c9a898" />
+          <circle cx="205" cy="150" r="3" fill="#c9a898" />
+        </svg>
+      </div>
+    </div>
+    <p class="text-subtext tracking-widest text-sm mb-4">A LITTLE MORE ABOUT YOU</p>
+    <h1 class="text-[clamp(2rem,5vw,3rem)] font-bold mb-6">MBTI 16型人格测试</h1>
+    <p class="text-subtext text-lg leading-relaxed mb-8">
+探索隐藏在日常表象之下的另一个自己。38个情境选择，打开属于你的人格档案。
+    </p>
+    <hr class="border-subtext/30 my-8">
+    <div class="grid grid-cols-3 gap-4 mb-10">
+      <div>
+        <div class="text-5xl font-bold text-primary">38</div>
+        <div class="text-subtext mt-1">情境题目</div>
+      </div>
+      <div>
+        <div class="text-5xl font-bold text-primary">16</div>
+        <div class="text-subtext mt-1">结果类型</div>
+      </div>
+      <div>
+        <div class="text-5xl font-bold text-primary">7</div>
+        <div class="text-subtext mt-1">预计分钟</div>
+      </div>
+    </div>
+    <hr class="border-subtext/30 my-8">
+    <button onclick="startTest()" class="w-full py-4 rounded-2xl bg-primary text-white text-xl font-medium hover:bg-primary/90 transition-all shadow-lg">
+开始探索
+    </button>
+    <p class="text-subtext mt-6 text-sm">按真实感受选择，不必寻找“正确答案”。</p>
+  </div>
+
+  <!-- 答题页 -->
+  <div id="page-question" class="hidden fade-in">
+    <div class="mb-6">
+      <div class="flex justify-between text-sm text-subtext mb-2">
+        <span>题目 <span id="q-index">1</span> / 38</span>
+        <span id="percent">0%</span>
+      </div>
+      <div class="w-full h-2 bg-gray-200 rounded-full overflow-hidden">
+        <div id="progress-bar" class="h-full bg-primary transition-all duration-300" style="width:0%"></div>
+      </div>
+    </div>
+    <div class="bg-cardbg rounded-xl p-6 mb-6 shadow-sm">
+      <h2 id="question-title" class="text-xl font-medium mb-6"></h2>
+      <div id="options-box" class="space-y-3"></div>
+    </div>
+    <div class="flex justify-between">
+      <button onclick="prevQuestion()" id="btn-prev" class="px-5 py-2 border border-gray-300 rounded-lg hover:bg-gray-100 transition">
+        <i class="fa fa-angle-left mr-1"></i> 上一题
+      </button>
+      <button onclick="nextQuestion()" id="btn-next" class="px-5 py-2 bg-primary rounded-lg text-white hover:bg-primary/90 transition">
+        下一题 <i class="fa fa-angle-right ml-1"></i>
+      </button>
+    </div>
+  </div>
+
+  <!-- 分析加载页 -->
+  <div id="page-loading" class="hidden fade-in text-center py-20">
+    <div class="loading-animate text-xl text-subtext">正在分析你的答题数据...</div>
+    <div class="mt-4 text-subtext">正在提取你的人格特质</div>
+  </div>
+
+  <!-- 结果页 -->
+  <div id="page-result" class="hidden fade-in">
+    <div class="text-center mb-6">
+      <p class="text-subtext mb-3">你的 MBTI 人格类型是</p>
+      <div class="grad-card rounded-2xl py-10 px-6 shadow-lg text-white">
+        <div id="type-code" class="text-[clamp(2.5rem,6vw,4rem)] font-black"></div>
+        <div id="type-name" class="text-xl mt-2 opacity-90"></div>
+      </div>
+      <div id="type-tags" class="mt-4 text-subtext"></div>
+    </div>
+
+    <!-- 四个维度进度条 -->
+    <div class="bg-white rounded-xl p-6 shadow-sm mb-6">
+      <h3 class="text-xl font-bold mb-6">你的四个维度倾向分数</h3>
+      <div class="space-y-5">
+        <div>
+          <div class="flex justify-between text-sm text-gray-500 mb-1">
+            <span>外向 E(<span id="scoreE">0</span>)</span>
+            <span class="text-gray-400">精力来源</span>
+            <span>内向 I(<span id="scoreI">0</span>)</span>
+          </div>
+          <div class="h-2 bg-gray-200 rounded-full overflow-hidden">
+            <div id="barEI" class="h-full bg-greenMain rounded-full transition-all"></div>
+          </div>
+        </div>
+        <div>
+          <div class="flex justify-between text-sm text-gray-500 mb-1">
+            <span>实感 S(<span id="scoreS">0</span>)</span>
+            <span class="text-gray-400">信息获取</span>
+            <span>直觉 N(<span id="scoreN">0</span>)</span>
+          </div>
+          <div class="h-2 bg-gray-200 rounded-full overflow-hidden">
+            <div id="barSN" class="h-full bg-greenMain rounded-full transition-all"></div>
+          </div>
+        </div>
+        <div>
+          <div class="flex justify-between text-sm text-gray-500 mb-1">
+            <span>思考 T(<span id="scoreT">0</span>)</span>
+            <span class="text-gray-400">决策方式</span>
+            <span>情感 F(<span id="scoreF">0</span>)</span>
+          </div>
+          <div class="h-2 bg-gray-200 rounded-full overflow-hidden">
+            <div id="barTF" class="h-full bg-greenMain rounded-full transition-all"></div>
+          </div>
+        </div>
+        <div>
+          <div class="flex justify-between text-sm text-gray-500 mb-1">
+            <span>判断 J(<span id="scoreJ">0</span>)</span>
+            <span class="text-gray-400">生活方式</span>
+            <span>知觉 P(<span id="scoreP">0</span>)</span>
+          </div>
+          <div class="h-2 bg-gray-200 rounded-full overflow-hidden">
+            <div id="barJP" class="h-full bg-greenMain rounded-full transition-all"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 📖核心画像固定卡片 -->
+    <div class="bg-white rounded-xl p-6 shadow-sm mb-6">
+      <h3 class="text-xl font-bold mb-4">📖 核心画像</h3>
+      <div id="desc-full" class="text-gray-600 leading-relaxed"></div>
+    </div>
+
+    <!-- 折叠模块 -->
+    <div class="space-y-3 mb-6">
+      <div>
+        <div class="toggle-item" onclick="toggleBlock('block1', this)">
+          <span class="text-xl">✨</span>
+          <span>你的突出优势</span>
+          <i class="fa fa-angle-down ml-auto transition-transform"></i>
+        </div>
+        <div id="block1" class="toggle-content"></div>
+      </div>
+      <div>
+        <div class="toggle-item" onclick="toggleBlock('block2', this)">
+          <span class="text-xl">⚠️</span>
+          <span>容易踩的坑与短板</span>
+          <i class="fa fa-angle-down ml-auto transition-transform"></i>
+        </div>
+        <div id="block2" class="toggle-content"></div>
+      </div>
+      <div>
+        <div class="toggle-item" onclick="toggleBlock('block3', this)">
+          <span class="text-xl">💼</span>
+          <span>职场与团队表现</span>
+          <i class="fa fa-angle-down ml-auto transition-transform"></i>
+        </div>
+        <div id="block3" class="toggle-content"></div>
+      </div>
+      <div>
+        <div class="toggle-item" onclick="toggleBlock('block4', this)">
+          <span class="text-xl">❤️</span>
+          <span>亲密关系与自我成长建议</span>
+          <i class="fa fa-angle-down ml-auto transition-transform"></i>
+        </div>
+        <div id="block4" class="toggle-content"></div>
+      </div>
+    </div>
+
+    <!-- 海报预览区域 -->
+    <div class="bg-white rounded-xl p-6 shadow-sm mb-6 text-center">
+      <h3 class="text-lg font-semibold mb-4">🖼分享海报</h3>
+      <canvas id="posterCanvas" style="display:none;"></canvas>
+      <img id="posterPreview" class="max-w-xs rounded-lg shadow-md mx-auto" />
+    </div>
+
+    <div class="flex gap-3 flex-wrap">
+      <button onclick="downloadPoster()" class="flex-1 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-100 transition">
+        <i class="fa fa-download mr-1"></i>下载海报
+      </button>
+      <button onclick="copyResult()" class="flex-1 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-100 transition">
+        <i class="fa fa-copy mr-1"></i>复制结果
+      </button>
+      <button onclick="restartTest()" class="flex-1 px-4 py-2 bg-primary rounded-lg text-white hover:bg-primary/90 transition">
+        <i class="fa fa-refresh mr-1"></i>重新测试
+      </button>
+    </div>
+  </div>
+
+  <div id="toast" class="toast">
+    <div class="flex items-center gap-2">
+      <i class="fa fa-check text-xl"></i>
+      <span>操作成功</span>
+    </div>
+  </div>
+</div>
+
+<script>
+// 38题题库
+const questions = [
+  {title:"周末空闲的时候，你更倾向？",opts:[{txt:"A. 约朋友聚会、出门社交，越玩越有精神",key:"E"},{txt:"B. 独自安静待着，看书刷视频，独处恢复精力",key:"I"},{txt:"C. 安排具体的小事，收拾房间、处理待办、做手工",key:"S"},{txt:"D. 放空畅想，构思新想法、幻想未来、脑洞联想",key:"N"}]},
+  {title:"别人跟你描述一件事，你最先关注？",opts:[{txt:"A. 对方当下的情绪感受，想先共情安抚",key:"F"},{txt:"B. 这件事逻辑是否通顺、对错和利弊",key:"T"},{txt:"C. 这件事的细节、真实发生的经过、具体信息",key:"S"},{txt:"D. 这件事背后的含义、可能性、隐藏的走向",key:"N"}]},
+  {title:"面对计划被临时打乱，你的感受是？",opts:[{txt:"A. 有点烦躁，希望尽快重新安排、回归秩序",key:"J"},{txt:"B. 觉得新鲜，可以灵活调整，顺其自然",key:"P"},{txt:"C. 先看现实条件，看看当下有什么资源可以用",key:"S"},{txt:"D. 立刻开始联想这件事带来的新机会",key:"N"}]},
+  {title:"在一群人聊天时，你通常？",opts:[{txt:"A. 主动接话，愿意分享想法，带动气氛",key:"E"},{txt:"B. 大多时候倾听，等别人主动来问你",key:"I"},{txt:"C. 聊真实发生的经历、干货、具体案例",key:"S"},{txt:"D. 聊观点、脑洞、猜想、长远的设想",key:"N"}]},
+  {title:"做决定的时候，你优先参考？",opts:[{txt:"A. 客观规则、数据、逻辑，对事不对人",key:"T"},{txt:"B. 大家的感受、人情氛围，避免伤害别人",key:"F"},{txt:"C. 过往经验、已经验证可行的办法",key:"S"},{txt:"D. 直觉预感、未来发展的可能性",key:"N"}]},
+  {title:"对于任务截止日期，你习惯？",opts:[{txt:"A. 提前规划，尽早做完，心里踏实",key:"J"},{txt:"B. 不急着完成，保留弹性，最后冲刺也可以",key:"P"},{txt:"C. 一步一步按流程做好，不跳步骤",key:"S"},{txt:"D. 先看目标，中间方式可以灵活改动",key:"N"}]},
+  {title:"学习一样新东西，你更喜欢？",opts:[{txt:"A. 现成教程、实操步骤、案例演示",key:"S"},{txt:"B. 先理解底层原理、理念，自己摸索创新",key:"N"},{txt:"C. 和别人一起讨论，边交流边学",key:"E"},{txt:"D. 自己慢慢钻研，安静独立学习",key:"I"}]},
+  {title:"和人产生分歧争论时，你？",opts:[{txt:"A. 专注讲道理，分清对错，不怕争执",key:"T"},{txt:"B. 害怕气氛尴尬，优先照顾对方情绪",key:"F"},{txt:"C. 拿事实、证据、过往经历支撑观点",key:"S"},{txt:"D. 从多角度猜想、推演不同可能性",key:"N"}]},
+  {title:"你的房间、文件、待办清单，更偏向？",opts:[{txt:"A. 分类整理，有秩序，东西放在固定位置",key:"J"},{txt:"B. 随性摆放，只要自己找得到就无所谓",key:"P"},{txt:"C. 实用优先，满足当下使用需求",key:"S"},{txt:"D. 看灵感，喜欢有创意、氛围感布置",key:"N"}]},
+  {title:"心里有想法、感受时，你一般？",opts:[{txt:"A. 愿意直接说出来，和他人交流",key:"E"},{txt:"B. 放在心里，很少主动表达，自己消化",key:"I"},{txt:"C. 描述客观事实，很少掺杂主观感受",key:"S"},{txt:"D. 描述感受、联想、想象，比较感性",key:"N"}]},
+  {title:"别人向你求助，你的第一反应？",opts:[{txt:"A. 先梳理问题，给出可行解决方案",key:"T"},{txt:"B. 先安慰对方情绪，共情理解他",key:"F"},{txt:"C. 结合自己过往类似经历给办法",key:"S"},{txt:"D. 帮他多想几条不同出路和可能性",key:"N"}]},
+  {title:"看电影、故事，你更容易记住？",opts:[{txt:"A. 剧情细节、人物动作、真实情节",key:"S"},{txt:"B. 主题寓意、伏笔、人物内心隐喻",key:"N"},{txt:"C. 角色的选择是否符合逻辑",key:"T"},{txt:"D. 角色的情绪和情感变化",key:"F"}]},
+  {title:"出行旅游，你更喜欢？",opts:[{txt:"A. 做好详细攻略，路线、时间提前安排好",key:"J"},{txt:"B. 大概有方向，到地方随缘逛",key:"P"},{txt:"C. 打卡知名景点、品尝当地特色美食",key:"S"},{txt:"D. 寻找小众地方，感受氛围、体验不一样的感觉",key:"N"}]},
+  {title:"评价一个方案好不好，你看重？",opts:[{txt:"A. 逻辑严谨、效率高、收益明确",key:"T"},{txt:"B. 兼顾所有人感受，大家都舒服",key:"F"},{txt:"C. 落地简单、有成熟经验可以参考",key:"S"},{txt:"D. 有新意、能带来长远改变",key:"N"}]},
+  {title:"连续社交很久之后，你会？",opts:[{txt:"A. 越聊越兴奋，还想继续玩",key:"E"},{txt:"B. 精力耗尽，需要独处休息回血",key:"I"},{txt:"C. 回想刚才聊天里有用的信息",key:"S"},{txt:"D. 回味对话里的想法和感受",key:"N"}]},
+  {title:"面对一个新的项目，你首先？",opts:[{txt:"A. 定好目标，拆分任务，规划时间表",key:"J"},{txt:"B. 先感受方向，边做边调整",key:"P"},{txt:"C. 先看现有资源、现实限制条件",key:"S"},{txt:"D. 先畅想可以做成什么样、有什么创意",key:"N"}]},
+  {title:"别人夸奖你的时候，你？",opts:[{txt:"A. 大方接受，也愿意和对方继续聊天",key:"E"},{txt:"B. 有点不好意思，低调不希望被过度关注",key:"I"},{txt:"C. 会思考这件事是不是真的做好了",key:"S"},{txt:"D. 会联想这件事背后带来的影响",key:"N"}]},
+  {title:"你更相信？",opts:[{txt:"A. 亲身经历、亲眼所见、已经发生的事实",key:"S"},{txt:"B. 直觉、预感、冥冥之中的感受",key:"N"},{txt:"C. 理性逻辑推导出来的结论",key:"T"},{txt:"D. 内心的感受和价值判断",key:"F"}]},
+  {title:"做选择时，你倾向？",opts:[{txt:"A. 尽快敲定，不反复纠结内耗",key:"J"},{txt:"B. 多观望一段时间，不想太早定死",key:"P"},{txt:"C. 对比实际利弊，看哪个更实用",key:"S"},{txt:"D. 跟着内心向往，看哪个更符合理想",key:"N"}]},
+  {title:"团队分配任务，你更愿意？",opts:[{txt:"A. 和大家一起协作沟通，随时交流进度",key:"E"},{txt:"B. 独立负责一块，自己安静完成",key:"I"},{txt:"C. 按要求把规定内容稳稳做完",key:"S"},{txt:"D. 尝试优化，加入新想法",key:"N"}]},
+  {title:"听到一个全新的猜想、脑洞，你第一反应？",opts:[{txt:"A. 好奇，愿意跟着一起畅想",key:"N"},{txt:"B. 先问有没有证据、能不能实现",key:"S"},{txt:"C. 分析这个想法逻辑上成不成立",key:"T"},{txt:"D. 思考这个想法会不会让别人不舒服",key:"F"}]},
+  {title:"当你犯错被指出时，你？",opts:[{txt:"A. 先冷静分析，看看问题在哪、怎么改正",key:"T"},{txt:"B. 心里先难过，在意对方的态度",key:"F"},{txt:"C. 关注事实，哪里做错就改哪里",key:"S"},{txt:"D. 思考这件事带来的影响和后续变化",key:"N"}]},
+  {title:"对于生活里的各类安排，你更喜欢？",opts:[{txt:"A. 有计划、有安排，生活有节奏",key:"J"},{txt:"B. 自由随性，不被计划束缚",key:"P"},{txt:"C. 稳定不变，熟悉的模式更安心",key:"S"},{txt:"D. 经常有变化，新鲜事物更吸引你",key:"N"}]},
+  {title:"聊天话题，你更喜欢？",opts:[{txt:"A. 身边日常、真实见闻、具体琐事",key:"S"},{txt:"B. 观点、人生、未来、抽象话题",key:"N"},{txt:"C. 辩论、分析利弊、讨论规则",key:"T"},{txt:"D. 感受、情感、人际关系、故事",key:"F"}]},
+  {title:"你在表达想法的时候，习惯？",opts:[{txt:"A. 想到就说，边说边整理思路",key:"E"},{txt:"B. 在心里反复想好，成熟了才开口",key:"I"},{txt:"C. 讲得直白具体，少抽象描述",key:"S"},{txt:"D. 喜欢比喻、联想，表达比较含蓄",key:"N"}]},
+  {title:"如果有两件事冲突，你优先？",opts:[{txt:"A. 遵守规则、公平对待",key:"T"},{txt:"B. 体谅他人，照顾人情",key:"F"},{txt:"C. 优先处理紧急、现实的事情",key:"S"},{txt:"D. 优先对你长远目标更重要的事",key:"N"}]},
+  {title:"一件事情快要收尾，你希望？",opts:[{txt:"A. 尽快敲定，彻底结束，落定结果",key:"J"},{txt:"B. 留有余地，以后还可以修改调整",key:"P"},{txt:"C. 检查细节，保证不出错",key:"S"},{txt:"D. 思考这件事有没有更好的可能性",key:"N"}]},
+  {title:"认识新朋友，你？",opts:[{txt:"A. 主动搭话，轻松开启聊天",key:"E"},{txt:"B. 等对方主动，慢慢熟悉",key:"I"},{txt:"C. 先了解对方的工作、日常等现实信息",key:"S"},{txt:"D. 先感受对方的想法、三观、气质",key:"N"}]},
+  {title:"你更容易被评价为？",opts:[{txt:"A. 务实稳重，脚踏实地",key:"S"},{txt:"B. 想象力丰富，想法很多",key:"N"},{txt:"C. 理性客观，就事论事",key:"T"},{txt:"D. 温柔体贴，善于共情",key:"F"}]},
+  {title:"突然有空出来的半天时间，你会？",opts:[{txt:"A. 立刻安排事情填满，不浪费时间",key:"J"},{txt:"B. 随便放松，不刻意安排",key:"P"},{txt:"C. 做一些已经计划好的小事",key:"S"},{txt:"D. 随便发呆、构思新想法",key:"N"}]},
+  {title:"看别人做计划，你最先留意？",opts:[{txt:"A. 时间节点、步骤、具体怎么做",key:"S"},{txt:"B. 目标、愿景、这件事的意义",key:"N"},{txt:"C. 方案是否高效合理",key:"T"},{txt:"D. 这个计划会不会让大家有压力",key:"F"}]},
+  {title:"压力大的时候，你缓解方式？",opts:[{txt:"A. 和朋友倾诉、出门散心",key:"E"},{txt:"B. 自己独处，安静消化情绪",key:"I"},{txt:"C. 动手做事，打扫、干活转移注意力",key:"S"},{txt:"D. 胡思乱想，梳理内心感受和想法",key:"N"}]},
+  {title:"面对不确定的事情，你？",opts:[{txt:"A. 想办法收集信息，摸清现实情况",key:"S"},{txt:"B. 去猜想多种走向，预判可能性",key:"N"},{txt:"C. 理性评估风险，做好预案",key:"T"},{txt:"D. 担心会不会影响身边人的情绪",key:"F"}]},
+  {title:"做长期规划，你更看重？",opts:[{txt:"A. 每一步能不能落地执行",key:"S"},{txt:"B. 最终想要达成的理想状态",key:"N"},{txt:"C. 成本、收益、逻辑可行性",key:"T"},{txt:"D. 身边人的感受和支持",key:"F"}]},
+  {title:"别人向你征求意见，你？",opts:[{txt:"A. 直白客观，说出利弊，不刻意讨好",key:"T"},{txt:"B. 委婉温和，优先照顾对方感受",key:"F"},{txt:"C. 基于过往经验给出稳妥建议",key:"S"},{txt:"D. 帮他打开思路，提供不一样角度",key:"N"}]},
+  {title:"你讨厌哪种状态？",opts:[{txt:"A. 混乱无序、没有安排",key:"J"},{txt:"B. 被条条框框限制死",key:"P"},{txt:"C. 脱离现实、不切实际的空想",key:"S"},{txt:"D. 一成不变、重复枯燥",key:"N"}]},
+  {title:"在集体里，你更偏向？",opts:[{txt:"A. 活跃气氛，主动表达自己",key:"E"},{txt:"B. 低调观察，很少主动发言",key:"I"},{txt:"C. 做好分内事，保证任务完成",key:"S"},{txt:"D. 思考整体方向，提出新想法",key:"N"}]},
+  {title:"你更认同下面哪一句话？",opts:[{txt:"A. 现实稳定，做好眼前事最重要",key:"S"},{txt:"B. 心怀远方，可能性比现状重要",key:"N"},{txt:"C. 道理优先，公平是底线",key:"T"},{txt:"D. 人心优先，理解和包容最重要",key:"F"}]}
+];
+
+//16型扩充长文案，真实贴近普通人
+const typeInfo = {
+ISTJ:{
+name:"检查员",
+tags:"务实家 · 严谨、可靠、守序、注重细节",
+full:"现实生活里，你给外人的第一印象往往是稳重克制、做事靠谱，是朋友同事遇到事情第一时间会想到求助的人。你不喜欢花里胡哨的场面话，不会轻易许诺，但是只要答应下来，就会想尽办法把事情落实到位。表面上看你情绪波动很小，遇事冷静讲道理，很多人会误以为你“没有情绪、不近人情”。但你的内心其实感受很丰富，只是习惯把委屈、不安全部藏在心里，不愿意向外人展露脆弱。你极度依赖过往经验与已经被验证可行的方案，面对完全陌生、没有参考案例的局面，内心会悄悄产生焦虑。你不喜欢无意义的社交应酬，社交追求少而精，比起一大群人的热闹，更愿意和少数信任的人相处。很多时候明明心里已经很累，你依然会逼迫自己把该完成的任务做完。你渴望生活是可控、有条理的，一旦计划被突如其来的变故打乱，会需要一段时间才能重新平复心态。你看重安全感，相信脚踏实地的付出，不相信天上掉馅饼式的运气。",
+strength:"✅做事靠谱，责任心极强，交代给你的任务会尽量完整落地；观察力强，留意细节不容易出现疏漏；重信守诺，答应的事情会放在心上；情绪克制，很少冲动行事；擅长在混乱局面中重建秩序。",
+weak:"⚠️容易依赖旧经验，不太愿意尝试没有先例的新方案；习惯压抑内心情绪，有委屈压力习惯自己硬扛；不擅长主动表达感受，很容易被别人误会冷漠；面对突发变化容易焦虑，抗拒脱离计划的意外。",
+work:"在职场团队中，你适合标准化、需要严谨细致的岗位。你会严格遵守流程，认真完成分内工作，不喜欢冒无意义的风险。你做事踏实，值得同事信赖，但不喜欢频繁毫无预兆的变动；不太擅长主动争取话语权，很多想法只会默默做好，不会主动宣扬自己的功劳。",
+lovegrowth:"💞感情里专一有担当，不会花言巧语，习惯用实际行动表达爱意。你希望关系稳定长久，很难接受反复无常情绪化的伴侣。\n🌱成长建议：不必死守过去的经验，偶尔允许自己尝试没有标准答案的选择；你的情绪同样值得被看见，不必凡事全部独自承担。"
+},
+ISFJ:{
+name:"守卫者",
+tags:"守护者 · 体贴、耐心、奉献、重视陪伴",
+full:"在外人眼中，你是温和好说话、非常懂得体谅他人的一类人。你对周围人的情绪变化感知十分敏锐，谁不开心、谁处境为难，你常常能够第一时间察觉到。很多时候，哪怕自己已经很累，看到别人需要帮助，还是会忍不住伸出援手。旁人常常看见你和善包容的一面，却很少看见你独处时积压的疲惫。你内心很害怕冲突和争吵，为了维持氛围和睦，常常选择把自己的诉求往后放，习惯性妥协退让。你十分念旧，过往的人和经历会在你心里留存很久，很难真正放下遗憾。你并不向往轰轰烈烈的生活，内心真正渴望的是被理解、被看见，希望自己的善意与付出能够得到回应，而不是被当成理所当然。你不喜欢虚伪客套的社交，只想和真诚的人维系长久稳定的关系。当一直得不到回馈时，你不会大吵大闹，只会慢慢沉默，一点点收回自己的热情。",
+strength:"✅共情敏锐，善于感知他人情绪；做事细致耐心，愿意默默付出；重视情谊，对待亲友真诚；有责任感，愿意守护身边人；擅长记住别人容易忽略的小细节。",
+weak:"⚠️不懂拒绝，习惯性优先满足别人，长期积累委屈；害怕关系破裂，发生矛盾优先妥协，不敢说出自己真实诉求；容易沉浸过去，很难放下已经发生的遗憾；容易过度消耗自己讨好他人。",
+work:"工作当中，你适合服务、人文关怀类岗位。你愿意照顾团队其他人的感受，协作上十分友善。但你不喜欢公开冲突，遇到不公有时会选择隐忍；很少主动争取个人利益，常常默默付出，功劳容易被忽视。",
+lovegrowth:"💞恋爱中细腻温柔，愿意持续付出，期待双向的温柔对待。你非常需要自己的善意被看见，如果长期被忽视，会慢慢关上内心。\n🌱成长建议：你的善意不代表要无底线妥协，学会拒绝，你的感受同样重要，冲突不一定会毁掉关系。"
+},
+INFJ:{
+name:"提倡者",
+tags:"理想家 · 共情、远见、深刻、追求意义",
+full:"在外人眼里，你安静内敛，想法很深，有时候会给人一点距离感。很多人只看到你温和理性的外壳，却看不到你汹涌丰富的内心世界。你天生习惯去看透人和事情表象之下的本质，很容易读懂别人没有说出口的情绪与想法。你拥有一套非常牢固的内在价值观，外界的舆论、别人的看法很难轻易改变你的信念。现实中你常常会遇到理想和现实发生碰撞的时刻，这也是你内心痛苦的主要来源。你很容易吸收身边人的负面情绪，明明不是你的问题，却会共情对方的苦难，独自承受精神消耗。大部分泛泛之交的社交对你来说是巨大消耗，你不需要很多朋友，只渴求少数灵魂同频，可以深度交心的关系。你厌恶虚伪、功利的应酬，遇到言不由衷的场面，只想尽快逃离。很多时候你习惯独自消化所有心事，不愿意向旁人袒露脆弱，害怕不被理解。你做一件事，不只看结果好坏，更在意这件事本身是否具备精神意义。",
+strength:"✅深度洞察力，可以读懂人心；共情力强，可以理解别人内心痛苦；拥有长远眼光，擅长预判发展；坚守本心，不随波逐流；善于挖掘事物深层含义。",
+weak:"⚠️对自己和他人期待值过高，很容易失望；容易吸收周围人的负面情绪，造成严重精神内耗；习惯独自消化所有心事，很少向外求助；厌烦琐碎机械无意义的日常琐事。",
+work:"工作上你适合创作、咨询、人文教育类工作。你不喜欢重复机械的事务，渴望工作拥有精神价值。短板是：你对自己和他人标准都很高，容易失望；心思敏感，容易吸收别人的负面情绪；习惯独自消化一切，很少找人倾诉，容易精神内耗；不擅长处理琐碎、机械、没有意义的日常小事。",
+lovegrowth:"💞感情追求灵魂精神共鸣，十分厌恶虚伪客套，如果感受不到真诚，会悄悄抽离内心。\n🌱成长建议：接纳世界并不完美，降低对他人的期待，减少失望；不必强迫自己拯救所有人，你不用承担别人的情绪；学会放过自己，允许自己做一些没有宏大意义的小事。"
+},
+INTJ:{
+name:"建筑师",
+tags:"战略家 · 冷静、远见、独立、追求高效",
+full:"现实中，你给人的印象大多是冷静理性，遇事沉着，遇到问题第一反应是思考解决方案。很多人会误会你冷漠无情，只看重逻辑，其实你内心同样拥有情绪，只是你习惯性用理性把情绪包裹起来，不轻易向外流露。你骨子里十分独立，不喜欢盲从权威或者大众主流观点，凡事习惯自己动脑推演判断。你擅长站在长远的全局视角看待问题，很容易看到别人看不到的风险与机遇。你非常讨厌低效、无意义的人情内耗和肤浅闲聊。你的高标准不仅用来要求自己，也会不自觉用来衡量身边的人和事，因此容易对他人感到失望。大部分社交对你属于功能性，你并不渴求大量社交，独处思考、钻研问题对你来说是恢复精力的方式。面对亲密关系，你不擅长甜言蜜语，表达在乎的方式，是规划两个人的未来，思考长远现实。当身边人情绪化不讲逻辑的时候，你会感到难以理解，不知道如何应对。",
+strength:"✅逻辑思维强悍，目标感强；眼光长远，擅长布局规划；独立思考，不迷信权威；可以快速抓住问题的核心矛盾；学习理解复杂事物能力出众。",
+weak:"⚠️容易忽略他人情绪，给人高冷距离感；对低效、感性行为耐心不足；高标准很难接纳别人的不完美；不喜欢反复解释自己的想法，容易被误会高傲。",
+work:"职场中你擅长战略规划、研发、分析类工作。你看重做事效率，对拖拖拉拉难以容忍。你更享受独立思考钻研，社交更多偏向功能性；不喜欢无意义人情应酬。",
+lovegrowth:"💞感情慢热，不擅长甜言蜜语，表达爱意更多是规划两个人的未来。很难忍受情绪化、没有独立想法的伴侣。\n🌱成长建议：人情也有它存在的意义，不必强求所有人都和你一样理性；适当表达柔软，别人需要一点时间跟上你的思路。"
+},
+ISTP:{
+name:"手艺人",
+tags:"实干家 · 灵活、冷静、动手、活在当下",
+full:"生活当中，你看上去随性松弛，遇事不容易慌乱，面对突发状况可以快速调整状态。你更加相信亲身实操得出的结果，对空洞大道理、长篇说教提不起兴趣。旁人常常觉得你很好相处，什么都看得开，但你内心边界感很强，看上去随和，实际上很难真正走进你的内心。你不喜欢被条条框框牢牢束缚，反感冗长死板的计划，更喜欢随机应变，走一步看一步。遇到矛盾冲突，你的本能是解决现实问题，不太擅长处理复杂缠绕的情绪纠葛。当别人向你倾诉情绪难过时，你第一反应是给出解决方案，常常忽略对方只是想要被共情安抚。你需要充足的个人空间，不管是朋友还是恋人，过度黏人、管控会让你本能想要逃离。你活在当下，享受眼前真实体验，对于太过遥远虚无的未来，不会过度思虑。",
+strength:"✅临场应变能力出色；动手实操能力强；心态松弛，遇事冷静；可以快速找到务实解决办法；不被教条束缚，懂得灵活变通。",
+weak:"⚠️不擅长做长期规划，习惯走一步看一步；别人情绪崩溃的时候，你习惯性讲道理，共情安抚不足；耐心有限，厌倦重复枯燥；不擅长主动袒露内心感受。",
+work:"适合技术调试、实操、应急处理类岗位。面对突发问题你可以快速搞定；但是对长期繁琐的流程任务容易感到枯燥。你不喜欢被严密管控，需要一定自由度。",
+lovegrowth:"💞恋爱直接随性，习惯行动表达关心，需要大量个人独处空间，讨厌黏人和控制欲。\n🌱成长建议：重要事情可以建立简单长期规划；别人难过时先共情，不必急着输出解决方案；试着多表达内心感受。"
+},
+ISFP:{
+name:"探险家",
+tags:"艺术家 · 温柔、感性、审美、忠于自我",
+full:"你内心温柔浪漫，活在当下，感官感知细腻，对美、氛围体验非常敏感。忠于自己内心真实感受，反感强势说教与虚伪。待人温和，不爱争吵冲突，习惯包容周围的人和事。很多人觉得你性格好脾气软，但是你的内心拥有非常坚定的底线，只是你不爱激烈吵架，遇到压迫时更多选择默默远离。你不喜欢高压紧绷的环境，身处压抑的氛围会让你内心很煎熬。你不太擅长做长远宏大规划，更在意当下的体验感受。遇到冲突，你的本能是回避，很难主动站出来对峙，害怕矛盾激化。你心软善良，不太懂得拒绝别人，很容易被强势的人拿捏。你的内心向往自由，一旦感受到关系、环境对你产生束缚，就会萌生逃离的念头。",
+strength:"✅感知细腻，审美出众；待人包容友善；尊重自己内心感受；善于发现生活微小美好；不强求别人按照自己想法活。",
+weak:"⚠️习惯回避冲突，不敢设立自我边界；遇到高压环境容易逃避；缺少长远目标，容易随波逐流；心软，很难拒绝别人，容易被强势的人拿捏。",
+work:"适合设计、美术、手工、创意类岗位。你讨厌高压管控、严苛教条的工作氛围；你擅长感受氛围，但是不喜欢高强度的冲突博弈。",
+lovegrowth:"💞感情浪漫细腻，看重相处氛围，一旦感受到束缚就想要逃离，讨厌充满评判压迫感的关系。\n🌱成长建议：冲突不完全是坏事，勇敢表达自己边界；给自己设立小目标，不要一味随波逐流；你的温柔不等于软弱。"
+},
+INFP:{
+name:"调停者",
+tags:"理想主义 · 共情、诗意、包容、富有想象力",
+full:"现实中你外表看上去安静温和，但是你的内心世界无比丰富柔软，共情力很强，很容易体会他人的痛苦。坚守自己内心价值观，十分讨厌虚伪功利的人和事。想象力丰富，向往纯粹真诚的人际关系。现实和你的理想世界经常产生落差，这会让你陷入失落。外界的评价很容易刺伤你，一件小事，会在你的心里反复回想，不断自我怀疑，陷入精神内耗。你不喜欢喧闹繁杂的社交，社交对你消耗巨大，比起一堆泛泛之交，你只想要少数能够懂得你的知己。你想法、脑洞非常多，脑海里面构想无数美好画面，但是跨到现实落地执行，对你来说是巨大阻碍。对待感情你极其看重真诚，一旦投入会交付全部真心，如果受伤，很难彻底走出来。很多人看不到你的内心波澜，只看到你安静，不知道你的精神世界多么汹涌。",
+strength:"✅内心善良真诚，包容度高；想象力创造力强；共情力出众；忠于本心，不容易被世俗功利裹挟；善于理解不同人的处境。",
+weak:"⚠️内心敏感，很容易被外界评价刺伤；频繁精神内耗，反复自我怀疑；理想和现实落差大就容易逃避现实；想法很多，但落地执行偏弱。",
+work:"适合文学创作、心理、人文公益岗位。你看重工作精神内核，讨厌勾心斗角的职场环境。你灵感充沛，但面对枯燥落地流程容易犯难。",
+lovegrowth:"💞向往灵魂深度契合的恋爱，期待无条件理解；投入感情很深，受伤之后很难走出来。\n🌱成长建议：认清现实世界规则；区分外界评价和真实的自己；把大想法拆分成很小步骤慢慢落地。"
+},
+INTP:{
+name:"逻辑学家",
+tags:"思考者 · 好奇、思辨、发散、热爱探索",
+full:"生活当中，你看上去佛系淡然，对世俗名利追逐没有太大兴趣。你最大的乐趣来自思考、拆解问题，遇到感兴趣的话题，会刨根问底，反复推演各种可能性。你习惯性质疑现成的结论，不会别人说什么就相信什么，凡事喜欢自己琢磨出逻辑。很多人觉得你聪明，但是看不懂人情世故，社交潜台词、言外之意，常常被你忽略。现实琐碎、重复无聊的日常事务，会让你觉得乏味。你内心想法海量，脑海中构思无数方案，但是很多想法仅仅停留在思考，很难推进到现实落地。你并不排斥社交，但更喜欢聊知识、观点、逻辑；无意义寒暄客套，对你十分煎熬。遇到情绪冲突的时候，你的第一反应是分析道理，很难捕捉情绪层面的需求。你享受独处思考，沉浸在自己的思绪里，会忘记时间。",
+strength:"✅思维发散，逻辑强，学习能力强；擅长发现逻辑漏洞；多角度看待问题；好奇心旺盛；独立思考，不轻易盲从现成观点。",
+weak:"⚠️想法很多落地很少；对人情世故很迟钝，看不懂潜台词；厌烦繁琐的日常事务，很难坚持长期枯燥的流程；情绪感知弱，容易在无意中忽略别人感受。",
+work:"适合理论研究、编程、数据分析、哲学、研发。享受思考拆解难题；对重复性行政琐事耐心很差。社交喜欢脑力话题，对寒暄客套兴趣不高。",
+lovegrowth:"💞恋爱慢热，偏爱思想交流，不擅长甜言蜜语；很难接受不讲逻辑的情绪化争吵。\n🌱成长建议：部分想法可以试着落地；人情也是一套运行规则；不要一直躲在思考里面，多多体验现实生活。"
+},
+ESTP:{
+name:"企业家",
+tags:"行动派 · 外向、果敢、临场、热爱新鲜",
+full:"自信外向，临场反应敏捷，活在当下的行动派。适应力极强，不怕突发状况，观察力敏锐。热爱新鲜刺激的体验，讨厌死板一成不变的生活，说话直白坦率。但这份直白，有时候会无心说出伤害别人的话，自己却没有察觉到。你追求新鲜感，对一成不变的生活会很快感到乏味。你擅长社交，可以和各式各样的人快速打成一片，但是内心真正交心的朋友并不多。你更加看重眼前利弊，对于很久之后才显现的长远后果，很容易忽略。你做事崇尚行动，比起反复空想，更愿意动手试一试看看结果。",
+strength:"✅临场能力强、行动力快、社交大方，擅长处理现实问题，敢尝试，不怕失败。",
+weak:"⚠️容易只顾眼前，忽略长远代价；耐心差，不适合长期枯燥的规划；有时候说话直白，不经意伤到别人；容易厌倦稳定，不停寻找新鲜感。",
+work:"适合销售、商务、活动策划、运营、谈判。临场反应快，擅长社交，不怕突发状况，讨厌枯燥、死板、一成不变的生活。",
+lovegrowth:"💞感情热情直接，充满烟火气，讨厌沉闷压抑的相处模式。\n🌱成长建议：享受当下同时，多留意长远后果；说话之前短暂停顿，照顾别人感受；稳定不等于枯燥。"
+},
+ESFP:{
+name:"表演者",
+tags:"阳光者 · 热情、鲜活、乐观、感染力强",
+full:"你热情鲜活，感染力很强，如同人群中的小太阳。擅长带动氛围，享受当下快乐，热爱美好新鲜体验，讨厌沉重压抑的说教。为人真诚直白，不记仇，愿意把快乐分享给身边人。但是你本能回避沉重、压抑、悲伤的话题，不愿意长时间沉浸负面情绪。你需要外界的正向反馈，赞美、认可会让你充满能量。做决定的时候，很容易被当下的感受左右，对于未来潜在风险，思考的会比较少。你很害怕长时间的孤单独处，喜欢和人在一起热闹的感觉。看上去大大咧咧，其实内心也会敏感，只是习惯用乐观把情绪掩盖住，不愿意把负能量展露出来。",
+strength:"✅乐观开朗，共情力强，擅长调节气氛，很容易让人亲近，给身边人带来快乐。",
+weak:"⚠️不喜欢长远规划，很少思考未来风险；害怕枯燥沉重的话题，习惯逃避负面情绪；容易在意别人的眼光，需要持续的赞美和关注；做决定容易跟着当下感受走。",
+work:"适合演艺、主持、新媒体、活动、幼教、服务类。擅长带动氛围，热爱新鲜体验，讨厌沉重说教。",
+lovegrowth:"💞恋爱热烈浪漫，很会制造惊喜；很难长期忍受压抑、沉闷、充满压力的关系。\n🌱成长建议：快乐很珍贵，但也要留出精力思考未来；不必强迫自己时刻保持乐观；重大决定给自己冷静时间。"
+},
+ENFP:{
+name:"竞选者",
+tags:"追梦人 · 灵动、乐观、创意、热爱自由",
+full:"你精力充沛，脑洞源源不断，好奇心旺盛。想象力丰富，善于看到别人身上闪光点，乐于鼓励他人。讨厌死板僵化的规则，向往自由，喜欢探索各种各样可能性。你的想法层出不穷，新点子源源不断，但是很难沉下心把一件枯燥事情坚持到底。你的共情力很强，很容易接收到周围人的情绪，会不自觉把别人的烦恼揽到自己身上，造成自我消耗。你喜欢有趣、真诚的人，虚伪刻板爱说教的人会让你迅速失去兴趣。社交圈很广，但是真正走进内心的不多。你脑海中向往很多美好的未来图景，但是面对琐碎落地细节，就容易感到疲惫。一旦关系或者环境变得压抑死板，你的内心就会生出逃离的冲动。",
+strength:"✅感染力强、创意丰富、乐观温暖，擅长鼓舞他人，接纳度高，很容易和不同的人交朋友。",
+weak:"⚠️三分钟热度，想法多难以坚持深耕；容易被别人情绪裹挟；讨厌繁琐细节，落地执行是短板；惧怕长期重复枯燥。",
+work:"适合策划、品牌、创意、教育、新媒体。脑洞源源不断，擅长鼓舞他人，讨厌死板一成不变的规则。",
+lovegrowth:"💞浪漫热烈，喜欢一起畅想未来；一旦关系变得沉闷被管控，就想要逃离。\n🌱成长建议：筛选真正重要目标坚持深耕；分清别人情绪和属于你的责任；不要排斥必要的琐碎小事。"
+},
+ENTP:{
+name:"辩论家",
+tags:"脑洞者 · 健谈、敏捷、质疑、享受碰撞",
+full:"现实中你思维跳脱，反应迅速，享受脑力思想碰撞。脑洞多反应快，多角度看待事物；幽默风趣，讨厌教条、不容质疑的环境。追求思想层面的自由。很多时候你只是单纯享受逻辑博弈，辩论抬杠，没有恶意，却会让对方觉得你在否定他本人。你兴趣广泛，开启很多新方向，但是很难沉下心，长期深耕单一枯燥领域。你欣赏可以和你平等思想碰撞的人，一味顺从的人会让你觉得乏味。你追求思想上的自由，非常反感被管控、被束缚。很多人会觉得你不靠谱，想法很多落地偏少，这是你经常遇到的误解。",
+strength:"✅思维敏捷，创意多；口才好，多角度拆解问题；敢于质疑固有认知；接受新事物速度快。",
+weak:"⚠️喜欢抬杠辩论，只顾博弈忽略对方情绪；耐心不足，很难长期深耕一件枯燥事；容易不断寻找新挑战，很难沉下心深耕一件事；容易让人觉得不靠谱。",
+work:"适合策略策划、市场、法务岗位。享受思想交锋；不喜欢死板教条、一切规定死的环境。",
+lovegrowth:"💞恋爱有趣脑洞多，需要思想平等交流，讨厌被束缚管控。\n🌱成长建议：分清辩论和沟通，不是每件事都要分出输赢；多留意对方情绪感受。"
+},
+ESTJ:{
+name:"总经理",
+tags:"管理者 · 果断、务实、负责、重视秩序",
+full:"现实生活当中，你行事果断，责任感很重，遇到混乱局面，你会主动站出来把局面理顺。你看重规则、效率、公平，做事说到做到，答应的事就会负责到底。你很难容忍拖延、敷衍、混乱无序。你习惯拿自己的标准衡量周遭人和事，希望事情按照合理流程向前推进。旁人会觉得你做事可靠，但是有时候会觉得你强势，不够柔软。你的理性优先，对于细腻复杂情绪体察不是你的强项，发生矛盾的时候，本能讲道理，而不是先安抚情绪。你不喜欢虚无缥缈脱离现实的空想，更相信看得见摸得着的现实结果。社交上你更看重靠谱守信的人，讨厌虚伪和懒散。对待感情家庭，你愿意扛起现实层面的责任，但是不太擅长细腻情绪抚慰。",
+strength:"✅组织统筹能力强；做事靠谱说到做到；面对混乱局面可以快速理顺；责任感强，敢于承担责任。",
+weak:"⚠️容易强势，习惯拿自己标准要求别人；对低效情绪化包容度低；不太擅长细腻情绪感知；很难接纳跳出规则的创新。",
+work:"适合管理、行政、项目统筹岗位。看重规则效率，希望团队井然有序；对摸鱼拖延的行为容忍度很低。",
+lovegrowth:"💞感情有担当，会规划现实生活，提供物质保障；不擅长细腻情绪安抚，容易讲道理。\n🌱成长建议：每个人节奏不一样；目标之外也要顾及他人感受；允许部分事情不按计划进行。"
+},
+ESFJ:{
+name:"执政官",
+tags:"协调者 · 友善、热心、顾家、维系氛围",
+full:"生活里你十分在意集体氛围是否和睦，很擅长捕捉大家情绪，主动照顾身边人的感受。你重视人情传统承诺，乐于付出，努力维持和睦。你很在意他人对你的评价，渴望被周围人认可接纳。很多时候，为了维持表面和谐，你会主动牺牲自己的诉求，迁就其他人。你记忆力很好，记得亲友的喜好，愿意主动照顾别人。但是你常常把别人需求放在第一位，忽略自己内心想要什么。遇到矛盾冲突，你的第一反应是息事宁人，而不是直面问题。你不喜欢背叛和冷漠，非常看重长久陪伴的关系。一味付出得不到回馈的时候，你的内心会积攒大量委屈，一点点消磨你的热情。",
+strength:"✅热心、体贴、擅长协调人际关系，靠谱守信，很容易被大家信任。",
+weak:"⚠️过度在意他人看法，容易为了迎合别人委屈自己；害怕冲突，遇到矛盾优先息事宁人；习惯把别人的需求放在前面，忽略自己；容易被人情绑架。",
+work:"适合人事、社群运营、教育客服岗位。很擅长维护团队氛围；但是害怕正面冲突，遇到不公容易息事宁人。",
+lovegrowth:"💞体贴顾家，用心经营日常；害怕背叛冷漠，冲突发生习惯妥协维持表面和睦。\n🌱成长建议：你的价值不需要所有人认可；学会拒绝；冲突不一定是坏事，真诚表达自己关系反而更稳固。"
+},
+ENFJ:{
+name:"主人公",
+tags:"引导者 · 温暖、感染力、共情、善于鼓舞",
+full:"现实当中，你温暖有力量，擅长读懂人心，拥有很强感染力。可以看见别人身上的潜力，乐于鼓励、陪伴他人成长。你拥有清晰正向价值观，真诚热忱，愿意为自己相信的事物付出。但你有一个致命负担：很容易把别人的人生期待扛到自己身上，过度为他人负责，不停透支消耗自己。大部分人被你的温暖吸引，愿意信任你，但真正能够走进你内心的挚友并不多。你向往双向奔赴共同成长的关系，单方面无尽付出会让你疲惫不堪。你对人和事期待比较高，当现实达不到你的期待，就会感到失望。你习惯照顾别人，常常忘记也要好好善待自己。",
+strength:"✅共情力强，领导力柔和，善于鼓舞他人，擅长理解不同人的需求，适合引导、沟通、教育类事情。",
+weak:"⚠️习惯承担别人期待，把别人的压力扛在自己身上；对自己和身边人期待很高，容易失望；很难接受冷漠、麻木、没有善意的人；过度消耗自己。",
+work:"适合培训、心理咨询、教育、社群、品牌。你可以带动团队氛围，帮助他人成长；但要注意不要过度消耗自己。",
+lovegrowth:"💞期待双向奔赴共同成长的感情；无法接受冷漠敷衍、不求上进的伴侣。\n🌱成长建议：你不需要对所有人的人生负责；接纳有些人不会改变；留出时间照顾自己，不要一味透支。"
+},
+ENTJ:{
+name:"指挥官",
+tags:"统帅 · 自信、果决、战略、目标导向",
+full:"生活中你自信果决，目标感极强，天生战略领导者。擅长抓住核心做全局统筹，逻辑强悍，不怕冲突，追求效率结果。敢做决断，拥有魄力，不甘平庸。行事强势直接，说话直奔主题，不喜欢拐弯抹角。这会带来高效率，但是也常常忽略他人的情绪感受，容易被人觉得苛刻强势。你习惯掌控事情节奏，很难放手放权交给别人，总是觉得自己做更稳妥。你不甘平庸，内心拥有很高的自我要求。社交偏向功能性，更喜欢高质量思想碰撞，无意义闲聊应酬对你是负担。感情当中，你看重并肩前行，需要对等交流的伴侣，不喜欢依附、一味顺从的对象。",
+strength:"✅战略眼光出众；执行力强悍；敢于决断；面对复杂局面快速理清思路；抗压能力强。",
+weak:"⚠️强势直接，容易忽略他人情绪；对低效容忍度极低，容易显得苛刻；很难理解感性优先的选择；习惯掌控节奏，很难放手放权。",
+work:"适合企业管理、战略、项目负责人岗位。追求结果和效率，欣赏有能力独立思考的同事；对拖沓低效行为没有耐心。",
+lovegrowth:"💞愿意规划两个人的未来，并肩奋斗；需要独立强大可以对等交流的伴侣，不喜欢依附型人格。\n🌱成长建议：结果之外人的感受同样重要；不必全部掌控，适当放手给别人成长空间。"
+}
+};
+
+let current = 0;
+let answers = Array(questions.length).fill(null);
+let score = {E:0,I:0,S:0,N:0,T:0,F:0,J:0,P:0};
+
+function $(id){return document.getElementById(id);}
+function showPage(name){
+  ["page-start","page-question","page-loading","page-result"].forEach(p=>$(p).classList.add("hidden"));
+  $(name).classList.remove("hidden");
+}
+
+function startTest(){
+  current = 0;
+  answers = Array(questions.length).fill(null);
+  score = {E:0,I:0,S:0,N:0,T:0,F:0,J:0,P:0};
+  renderQuestion();
+  showPage("page-question");
+}
+
+function renderQuestion(){
+  const q = questions[current];
+  $("q-index").innerText = current+1;
+  $("question-title").innerText = q.title;
+  const box = $("options-box");
+  box.innerHTML = "";
+  q.opts.forEach((opt,idx)=>{
+    const div = document.createElement("div");
+    div.className = "btn-option " + (answers[current]===idx ? "active" : "");
+    div.innerText = opt.txt;
+    div.onclick = ()=>{
+      answers[current] = idx;
+      renderQuestion();
+      //判断：最后一题选中直接跳转分析，其余0.4秒下一题
+      if(current < questions.length -1){
+        setTimeout(()=>{
+          current++;
+          renderQuestion();
+        },400);
+      }else{
+        setTimeout(()=>{
+          showPage("page-loading");
+          setTimeout(calcResult,1600);
+        },400);
+      }
+    }
+    box.appendChild(div);
+  })
+  const done = answers.filter(x=>x!==null).length;
+  const pct = Math.round(done / questions.length *100);
+  $("percent").innerText = pct+"%";
+  $("progress-bar").style.width = pct+"%";
+  $("btn-prev").style.visibility = current>0 ? "visible":"hidden";
+}
+
+function prevQuestion(){
+  if(current>0){ current--; renderQuestion(); }
+}
+function nextQuestion(){
+  if(answers[current]===null){ alert("请选择一项"); return; }
+  if(current < questions.length-1){
+    current++; renderQuestion();
+  }else{
+    showPage("page-loading");
+    setTimeout(calcResult,1600);
+  }
+}
+
+function calcResult(){
+  score = {E:0,I:0,S:0,N:0,T:0,F:0,J:0,P:0};
+  for(let i=0;i<questions.length;i++){
+    const idx = answers[i];
+    const key = questions[i].opts[idx].key;
+    score[key]++;
+  }
+  let t = "";
+  t += score.E >= score.I ? "E":"I";
+  t += score.S >= score.N ? "S":"N";
+  t += score.T >= score.F ? "T":"F";
+  t += score.J >= score.P ? "J":"P";
+  const info = typeInfo[t];
+  $("type-code").innerText = t;
+  $("type-name").innerText = info.name;
+  $("type-tags").innerText = info.tags;
+  $("desc-full").innerText = info.full;
+  $("block1").innerText = info.strength;
+  $("block2").innerText = info.weak;
+  $("block3").innerText = info.work;
+  $("block4").innerText = info.lovegrowth;
+
+  //赋值分数
+  $("scoreE").innerText=score.E;$("scoreI").innerText=score.I;
+  $("scoreS").innerText=score.S;$("scoreN").innerText=score.N;
+  $("scoreT").innerText=score.T;$("scoreF").innerText=score.F;
+  $("scoreJ").innerText=score.J;$("scoreP").innerText=score.P;
+
+  //进度条
+  const totalEI = score.E+score.I;
+  const totalSN = score.S+score.N;
+  const totalTF = score.T+score.F;
+  const totalJP = score.J+score.P;
+  const pEI = totalEI===0 ? 50 : (score.E / totalEI * 100);
+  const pSN = totalSN===0 ? 50 : (score.S / totalSN *100);
+  const pTF = totalTF===0 ?50 : (score.T / totalTF *100);
+  const pJP = totalJP===0 ?50 : (score.J / totalJP *100);
+  $("barEI").style.width = pEI + "%";
+  $("barSN").style.width = pSN + "%";
+  $("barTF").style.width = pTF + "%";
+  $("barJP").style.width = pJP + "%";
+
+  drawPoster(t,info);
+  showPage("page-result");
+}
+
+//折叠
+function toggleBlock(id,dom){
+  const el = $(id);
+  const icon = dom.querySelector("i");
+  if(el.classList.contains("open")){
+    el.classList.remove("open");
+    icon.classList.remove("rotate-icon");
+  }else{
+    el.classList.add("open");
+    icon.classList.add("rotate-icon");
+  }
+}
+
+//canvas绘制分享海报
+function drawPoster(type,info){
+  const canvas = $("posterCanvas");
+  const ctx = canvas.getContext("2d");
+  const w = 600;
+  const h =900;
+  canvas.width=w;canvas.height=h;
+  const grad = ctx.createLinearGradient(0,0,w,h);
+  grad.addColorStop(0,'#8c647e');
+  grad.addColorStop(1,'#5c4254');
+  ctx.fillStyle=grad;
+  ctx.fillRect(0,0,w,h);
+  ctx.fillStyle="#ffffff";
+  ctx.font="bold 52px system-ui";
+  ctx.textAlign="center";
+  ctx.fillText(type,w/2,140);
+  ctx.font="bold 28px system-ui";
+  ctx.fillText(info.name,w/2,190);
+  ctx.font="18px system-ui";
+  ctx.fillText(info.tags,w/2,230);
+  ctx.textAlign="left";
+  ctx.font="17px system-ui";
+  ctx.fillStyle="#ffffffdd";
+  const maxW=520;
+  const lineH=34;
+  let x=40;
+  let y=290;
+  const shortText = info.full.substring(0,420);
+  const arr = shortText.split("");
+  let line="";
+  for(let ch of arr){
+    const test = line+ch;
+    if(ctx.measureText(test).width>maxW){
+      ctx.fillText(line,x,y);
+      line=ch;
+      y+=lineH;
+    }else{
+      line=test;
+    }
+  }
+  ctx.fillText(line,x,y);
+  ctx.textAlign="center";
+  ctx.font="16px system-ui";
+  ctx.fillText("MBTI 16型人格测试 · 仅供自我探索",w/2,h-70);
+  const dataUrl = canvas.toDataURL("image/png");
+  $("posterPreview").src = dataUrl;
+  window._posterUrl = dataUrl;
+}
+
+function downloadPoster(){
+  const a = document.createElement("a");
+  a.href = window._posterUrl;
+  a.download = "MBTI人格结果.png";
+  a.click();
+  showToast("海报已开始下载");
+}
+
+function copyResult(){
+  const txt = $("type-code").innerText + " " + $("type-name").innerText + "\n标签："+$("type-tags").innerText +
+"\n📖核心画像：\n"+$("desc-full").innerText +
+"\n✨突出优势：\n"+$("block1").innerText +
+"\n⚠️短板与坑：\n"+$("block2").innerText +
+"\n💼职场表现：\n"+$("block3").innerText +
+"\n❤️恋爱与成长建议：\n"+$("block4").innerText;
+  navigator.clipboard.writeText(txt).then(()=>showToast("已复制到剪贴板"));
+}
+
+function showToast(msg){
+  const t = $("toast");
+  t.querySelector("span").innerText = msg;
+  t.classList.remove("hidden");
+  setTimeout(()=>t.classList.add("hidden"),1300);
+}
+
+function restartTest(){
+  showPage("page-start");
+}
+</script>
+</body>
+</html>
